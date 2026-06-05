@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Kilroid vs Glitch — K&G University | Slam + Trash Talk AI</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(145deg, #1a5f2a 0%, #0e3a1a 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Comic Neue', 'Comic Sans MS', 'Chalkboard SE', cursive;
+      padding: 20px;
+      transition: background 0.3s;
+    }
+
+    body.adult-mode {
+      background: linear-gradient(145deg, #1a1a2e 0%, #0a0a1a 100%);
+    }
+
+    body.adult-mode .game-container {
+      background: rgba(0, 0, 0, 0.85);
+      box-shadow: 0 0 24px #ff004c;
+    }
+
+    body.adult-mode .btn-hoop {
+      background: #d00000;
+      color: #fff;
+      box-shadow: 0 5px 0 #6a0000;
+    }
+
+    body.adult-mode .player-card {
+      background: #2b2b2b;
+      color: #ffd966;
+      box-shadow: 0 12px 0 #5a3e1b;
+    }
+
+    body.adult-mode .speech-bubble {
+      background: #1e1e1e;
+      color: #ffaa66;
+      box-shadow: 4px 4px 0 #ff6600;
+    }
+
+    .game-container {
+      max-width: 1400px;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.55);
+      border-radius: 80px 80px 60px 60px;
+      backdrop-filter: blur(3px);
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.5);
+      padding: 20px 25px 30px;
+      position: relative;
+      transition: 0.2s;
+    }
+
+    .gear-icon {
+      position: absolute;
+      top: 25px;
+      right: 30px;
+      font-size: 32px;
+      cursor: pointer;
+      background: #ffcd7e;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px black;
+      transition: transform 0.2s;
+      z-index: 20;
+    }
+
+    .gear-icon:hover {
+      transform: rotate(20deg) scale(1.05);
+      background: gold;
+    }
+
+    .settings-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(5px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .settings-card {
+      background: #fff2df;
+      border-radius: 60px;
+      max-width: 550px;
+      width: 90%;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 20px 30px black;
+      font-family: monospace;
+    }
+
+    .settings-card h3 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+
+    .settings-card input,
+    .settings-card select {
+      width: 100%;
+      padding: 12px;
+      margin: 12px 0;
+      border-radius: 50px;
+      border: 1px solid #ccaa66;
+      font-size: 1rem;
+    }
+
+    .settings-card button {
+      background: #ffaa44;
+      border: none;
+      padding: 10px 25px;
+      border-radius: 40px;
+      font-weight: bold;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    .close-modal {
+      background: #aa6644;
+      color: white;
+      margin-top: 15px;
+    }
+
+    .city-selector {
+      margin: 15px 0;
+    }
+
+    .adult-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .court {
+      border-radius: 70px 70px 50px 50px;
+      padding: 20px 15px 15px;
+      box-shadow: inset 0 0 0 5px #f0a42a, inset 0 0 0 12px #ffcf7a, 0 10px 20px rgba(0, 0, 0, 0.3);
+      transition: background-image 0.3s, background-color 0.2s;
+      background-size: cover;
+      background-position: center;
+      background-blend-mode: overlay;
+    }
+
+    .court-bg-default {
+      background-color: #f6b83d;
+      background-image: radial-gradient(circle at 25% 40%, rgba(255, 215, 130, 0.6) 2%, transparent 2.5%);
+      background-size: 35px 35px;
+    }
+
+    canvas {
+      border-radius: 60px;
+      box-shadow: 0 10px 18px black;
+      width: 100%;
+      height: auto;
+      background: #6f4f2e;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .players-row {
+      display: flex;
+      gap: 25px;
+      margin: 20px 10px;
+      flex-wrap: wrap;
+    }
+
+    .player-card {
+      flex: 1;
+      background: #fff7e8;
+      border-radius: 65px;
+      padding: 20px 15px;
+      text-align: center;
+      box-shadow: 0 12px 0 #c29b3b;
+      transition: 0.2s;
+      border: 2px solid #ffcd7e;
+    }
+
+    .player-card.active-turn {
+      background: #fff1b5;
+      box-shadow: 0 0 0 4px gold, 0 12px 0 #c29b3b;
+      transform: scale(1.01);
+    }
+
+    .player-card.focus-user {
+      transform: scale(1.02) rotate(1deg);
+      box-shadow: 0 0 0 4px #ffdd88, 0 0 0 8px #ffaa33;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 15px;
+      background: #e0bc82;
+      border-radius: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 5px solid #ffb347;
+      cursor: pointer;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-placeholder {
+      font-size: 60px;
+    }
+
+    h2 {
+      font-size: 2rem;
+      margin: 5px 0;
+      text-shadow: 2px 2px 0 #c27e2e;
+    }
+
+    .score {
+      font-size: 2.5rem;
+      background: #2d1f0c;
+      display: inline-block;
+      padding: 0 20px;
+      border-radius: 50px;
+      color: #f9d56e;
+      margin: 5px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin: 20px 0 10px;
+    }
+
+    .btn-hoop {
+      font-size: 1.4rem;
+      padding: 12px 20px;
+      font-weight: bold;
+      border-radius: 60px;
+      border: none;
+      background: #ffb142;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #9b5e1a;
+      width: 170px;
+      transition: 0.05s linear;
+    }
+
+    .turn-indicator {
+      font-size: 1.5rem;
+      background: #ffd966;
+      display: inline-block;
+      padding: 8px 25px;
+      border-radius: 40px;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .speech-bubble {
+      background: white;
+      border-radius: 40px;
+      padding: 10px;
+      max-width: 220px;
+      margin: 10px auto;
+      font-size: 1rem;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.1);
+    }
+
+    .ai-chat-panel {
+      margin-top: 20px;
+      background: #2d2b1ee0;
+      border-radius: 50px;
+      padding: 20px;
+      backdrop-filter: blur(8px);
+    }
+
+    .chat-log {
+      background: #1e1b0fcc;
+      border-radius: 40px;
+      padding: 12px;
+      height: 170px;
+      overflow-y: auto;
+      margin-bottom: 12px;
+      color: #ffecb3;
+      font-size: 0.9rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .chat-message {
+      padding: 5px 12px;
+      border-radius: 30px;
+      background: #3f341d;
+      width: fit-content;
+      max-width: 85%;
+      margin: 2px 0;
+    }
+
+    .chat-message.user {
+      background: #4d7c2e;
+      align-self: flex-end;
+    }
+
+    .chat-message.kilroid {
+      background: #b64516;
+      align-self: flex-start;
+      border-left: 6px solid #ffaa44;
+    }
+
+    .chat-message.glitch {
+      background: #3f6b8f;
+      align-self: flex-start;
+      border-left: 6px solid #aaddff;
+    }
+
+    .chat-input-area {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chat-input-area input {
+      flex: 3;
+      padding: 10px 18px;
+      border-radius: 40px;
+      border: none;
+      background: #fff3da;
+    }
+
+    .chat-input-area button {
+      background: #ffaa55;
+      border: none;
+      padding: 8px 20px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .photos-gallery {
+      margin-top: 20px;
+      background: #eab676b3;
+      border-radius: 50px;
+      padding: 15px;
+      text-align: center;
+    }
+
+    .photo-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+
+    .photo-card {
+      background: #fff0c8;
+      border-radius: 30px;
+      width: 110px;
+      padding: 8px;
+      box-shadow: 0 6px 0 #aa763a;
+    }
+
+    .photo-card img {
+      width: 100%;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+
+    .upload-btn {
+      background: #ffc164;
+      border: none;
+      border-radius: 40px;
+      padding: 3px 8px;
+      margin-top: 5px;
+      font-size: 0.7rem;
+      cursor: pointer;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.7rem;
+      color: #ffecb3;
+    }
+
+    @keyframes bounceAnim {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-15px); }
+      100% { transform: translateY(0); }
+    }
+
+    .bounce-effect {
+      animation: bounceAnim 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <div class="gear-icon" id="gearBtn">⚙️</div>
+  <div class="court" id="courtElement">
+    <canvas id="gameCanvas" width="900" height="380" style="width:100%; max-width:900px; aspect-ratio:900/380"></canvas>
+    <div class="players-row">
+      <div class="player-card" id="kilroidCard">
+        <div class="avatar" id="kilroidAvatar"><div class="avatar-placeholder">🦖</div></div>
+        <h2>⚡ KILROID ⚡</h2>
+        <div class="height-badge" style="background:#f4a261; display:inline-block; padding:4px 15px; border-radius:40px;">🎈 SHORTY 🎈</div>
+        <div class="score" id="kilroidScore">0</div>
+        <div class="speech-bubble" id="kilroidBubble">🤪 Let's play!</div>
+      </div>
+      <div class="player-card" id="glitchCard">
+        <div class="avatar" id="glitchAvatar"><div class="avatar-placeholder">🦒✨</div></div>
+        <h2>🌀 GLITCH 🌀</h2>
+        <div class="height-badge" style="background:#f4a261; display:inline-block; padding:4px 15px; border-radius:40px;">🌟 TALL SIS 🌟</div>
+        <div class="score" id="glitchScore">0</div>
+        <div class="speech-bubble" id="glitchBubble">💥 Bring it, lil bro!</div>
+      </div>
+    </div>
+    <div style="text-align:center;">
+      <div class="turn-indicator" id="turnText">🔥 KILROID's TURN 🔥</div>
+      <div class="action-buttons"><button class="btn-hoop" id="slamBtn">🏀 SLAM DUNK 🏀</button><button class="btn-hoop" id="threeBtn">🎯 3-POINTER 🎯</button></div>
+    </div>
+  </div>
+
+  <div class="ai-chat-panel">
+    <div class="chat-log" id="chatLog"><div class="chat-message kilroid">👋 I'm Kilroid! Talk trash or just vibe!</div><div class="chat-message glitch">✨ And Glitch! Use gear ⚙️ for Gemini AI & adult mode!</div></div>
+    <div class="chat-input-area"><input type="text" id="chatInput" placeholder="💬 Chat with Kilroid & Glitch..."><button id="sendChatBtn">Send</button><button id="micChatBtn">🎤 Speak</button><button id="clearChatBtn">Clear</button></div>
+  </div>
+
+  <div class="photos-gallery"><div class="gallery-title">📸 4 SILLY PHOTOS (click to replace)</div><div class="photo-strip" id="photoStrip"></div></div>
+  <footer>🏆 K&G UNIVERSITY • SUPER SLAM • TRASH TALK • AI CHAT • ADULT MODE</footer>
+</div>
+
+<div id="settingsModal" class="settings-modal">
+  <div class="settings-card">
+    <h3>⚙️ ADULT MODE & BACKDROPS</h3>
+    <div class="adult-toggle"><label>🔞 ADULT MODE :</label><input type="checkbox" id="adultModeToggle"></div>
+    <div class="city-selector"><label>🌆 BACKGROUND (City / University)</label><select id="citySelect">
+      <option value="default">Classic Court</option>
+      <option value="K&G University">📚 K & G UNIVERSITY BANNER</option>
+      <option value="Harvard University">🎓 HARVARD UNIVERSITY (Ivy League)</option>
+      <option value="New York">🗽 New York Skyline</option>
+      <option value="Los Angeles">🌴 Los Angeles Skyline</option>
+      <option value="Chicago">🌬️ Chicago Skyline</option>
+      <option value="Houston">🚀 Houston Skyline</option>
+      <option value="Phoenix">☀️ Phoenix Skyline</option>
+      <option value="Philadelphia">🦅 Philadelphia Skyline</option>
+      <option value="San Antonio">🎸 San Antonio Skyline</option>
+      <option value="San Diego">🏄 San Diego Skyline</option>
+      <option value="Dallas">⭐ Dallas Skyline</option>
+      <option value="Cleveland">🏭 CLEVELAND Skyline</option>
+    </select></div>
+    <div style="margin:15px 0"><input type="password" id="modalApiKey" placeholder="🔑 Gemini API Key (optional for AI chat)"></div>
+    <button id="saveSettingsBtn">💾 SAVE SETTINGS</button>
+    <button id="closeModalBtn" class="close-modal">CLOSE</button>
+  </div>
+</div>
+
+<script src="game.js" defer></script>
+</body>
+</html>
